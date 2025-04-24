@@ -67,10 +67,10 @@ function sendOTPEmail($email, $otp, $firstName = '', $lastName = '') {
     try {
         // Server settings - MODIFY THESE WITH YOUR EMAIL PROVIDER DETAILS
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';         // SMTP server
+        $mail->Host       = getenv("smtp_host");         // SMTP server
         $mail->SMTPAuth   = true;                       // Enable SMTP authentication
-        $mail->Username   = 'fun.storage26@gmail.com';   // SMTP username
-        $mail->Password   = 'rdkriwciwwxztizj';      // SMTP password
+        $mail->Username   = getenv("smtp_username");   // SMTP username
+        $mail->Password   = getenv("smtp_password");      // SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
         $mail->Port       = 587;                        // TCP port to connect to
         

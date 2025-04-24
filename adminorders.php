@@ -71,10 +71,10 @@ function sendOrderStatusEmail($conn, $orderId, $newStatus) {
         try {
             // SMTP configuration (update these with your SMTP details)
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; // Update with your SMTP host
+            $mail->Host = getenv("smtp_host"); // Update with your SMTP host
             $mail->SMTPAuth = true;
-            $mail->Username = 'fun.storage26@gmail.com'; // Update with your email
-            $mail->Password = 'rdkriwciwwxztizj'; // Update with your password
+            $mail->Username = getenv("smtp_username"); // Update with your email
+            $mail->Password = getenv("smtp_password"); // Update with your password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
             

@@ -249,9 +249,9 @@ $conn->close();
  */
 function sendOrderConfirmationEmail($email, $name, $order_id, $items, $order_date, $address1, $address2, $city, $pincode, $phone, $payment_mode, $total_amount) {
     // SMTP Configuration
-    $smtp_host = 'smtp.gmail.com';
-    $smtp_username = 'fun.storage26@gmail.com';
-    $smtp_password = 'rdkriwciwwxztizj';
+    $smtp_host = getenv("smtp_host");
+    $smtp_username = getenv("smtp_username");
+    $smtp_password = getenv("smtp_password");
     $smtp_port = 587;
     $smtp_secure = PHPMailer::ENCRYPTION_STARTTLS;
     
