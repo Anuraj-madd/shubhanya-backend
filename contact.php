@@ -1,6 +1,7 @@
 <?php
 
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
@@ -13,6 +14,7 @@ error_reporting(E_ALL);
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
+
 // Contact form processor using PHPMailer
 
 // Include PHPMailer classes
@@ -30,28 +32,56 @@ $formError = false;
 
 // Process form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate and sanitize inputs
-    if (empty($_POST["name"])) {
-        $formError = true;
+    // Get the POST data
+    $input = file_get_contents('php://input');
+    
+    // Check if data is URL-encoded (from form submission)
+    if (!empty($_POST)) {
+        $postData = $_POST;
+    } 
+    // Try to parse JSON data if it exists
+    else if (!empty($input)) {
+        parse_str($input, $postData);
+        if (empty($postData)) {
+            // If parse_str failed, try JSON
+            $jsonData = json_decode($input, true);
+            if ($jsonData) {
+                $postData = $jsonData;
+            }
+        }
     } else {
-        $name = filter_var($_POST["name"], FILTER_SANITIZE_STRING);
+        $postData = [];
     }
     
-    if (empty($_POST["email"])) {
+    // Debug - log what we received
+    error_log("Received POST data: " . print_r($postData, true));
+    
+    // Validate and sanitize inputs
+    if (empty($postData["name"])) {
         $formError = true;
+        error_log("Name is empty");
     } else {
-        $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
+        $name = filter_var($postData["name"], FILTER_SANITIZE_STRING);
+    }
+    
+    if (empty($postData["email"])) {
+        $formError = true;
+        error_log("Email is empty");
+    } else {
+        $email = filter_var($postData["email"], FILTER_SANITIZE_EMAIL);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $formError = true;
+            error_log("Email is invalid: $email");
         }
     }
     
-    $phone = !empty($_POST["phone"]) ? filter_var($_POST["phone"], FILTER_SANITIZE_STRING) : "Not provided";
+    $phone = !empty($postData["phone"]) ? filter_var($postData["phone"], FILTER_SANITIZE_STRING) : "Not provided";
     
-    if (empty($_POST["message"])) {
+    if (empty($postData["message"])) {
         $formError = true;
+        error_log("Message is empty");
     } else {
-        $message = filter_var($_POST["message"], FILTER_SANITIZE_STRING);
+        $message = filter_var($postData["message"], FILTER_SANITIZE_STRING);
     }
     
     // If no errors, proceed with sending email
@@ -189,18 +219,26 @@ EOD;
             
             $mail->send();
             
+            error_log("Email sent successfully to contact@cybernetic.co.in");
+            
             // Return JSON success response
             echo json_encode(['success' => true, 'message' => 'Thank you for your message. We will get back to you soon!']);
             
         } catch (Exception $e) {
+            error_log("Email sending failed: " . $mail->ErrorInfo);
             // Return JSON error response
             echo json_encode(['success' => false, 'message' => "Message could not be sent. Error: {$mail->ErrorInfo}"]);
         }
     } else {
+        error_log("Form validation failed");
         // Return JSON validation error response
         echo json_encode(['success' => false, 'message' => 'Please fill out all required fields correctly.']);
     }
     
     exit; // Prevent further execution
+} else {
+    // Not a POST request
+    error_log("Not a POST request: " . $_SERVER["REQUEST_METHOD"]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
 ?>
