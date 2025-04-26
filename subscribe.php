@@ -11,20 +11,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-
-
 // Database connection settings
- // Your database name
 require_once 'config.php';
 
 // Initialize response array
 $response = array(
     'success' => false,
-    'message' => ''
+    'message' => '',
+    'debug' => '' // Add this for debugging
 );
 
 // Only process POST requests
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    // Debug: Check if any POST data was received
+    if (empty($_POST)) {
+        $response['debug'] = 'No POST data received. Raw input: ' . file_get_contents('php://input');
+    }
     
     // Check if email is provided
     if (isset($_POST['email']) && !empty($_POST['email'])) {
@@ -49,6 +52,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Prepare SQL statement to prevent SQL injection
                 $stmt = $conn->prepare("INSERT INTO subscribers (email, ip_address) VALUES (?, ?)");
+                
+                if (!$stmt) {
+                    throw new Exception("Prepare failed: " . $conn->error);
+                }
+                
                 $stmt->bind_param("ss", $email, $ip_address);
                 
                 // Execute the statement
@@ -60,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if ($conn->errno == 1062) {
                         $response['message'] = "You are already subscribed to our newsletter.";
                     } else {
-                        throw new Exception("Error: " . $stmt->error);
+                        throw new Exception("Execute error: " . $stmt->error . " (SQL errno: " . $conn->errno . ")");
                     }
                 }
                 
@@ -69,7 +77,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $conn->close();
                 
             } catch (Exception $e) {
-                $response['message'] = "An error occurred: " . $e->getMessage();
+                $response['message'] = "Database error";
+                $response['debug'] = $e->getMessage(); // Only include in development
             }
             
         } else {
@@ -85,6 +94,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Return JSON response
-header('Content-Type: application/json');
 echo json_encode($response);
+exit;
 ?>
