@@ -14,10 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 
 // Database connection settings
-$host = "localhost";    // Your database host
-$username = "root";     // Your database username
-$password = "";         // Your database password
-$database = "shubhanya_db"; // Your database name
+ // Your database name
+require_once 'config.php';
 
 // Initialize response array
 $response = array(
