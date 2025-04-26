@@ -104,15 +104,15 @@ function sendEmailToSubscribers($subscribers, $title, $content) {
         try {
             // Server settings
             $mail->isSMTP();
-            $mail->Host = 'smtp.example.com'; // Replace with your SMTP server
+            $mail->Host = getenv('smtp_host'); // Replace with your SMTP server
             $mail->SMTPAuth = true;
-            $mail->Username = 'your_email@example.com'; // Replace with your email
-            $mail->Password = 'your_password'; // Replace with your password
+            $mail->Username = getenv('smtp_username'); // Replace with your email
+            $mail->Password = getenv('smtp_password'); // Replace with your password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
             
             // Recipients
-            $mail->setFrom('no-reply@example.com', 'Your Company Name');
+            $mail->setFrom('no-reply@cybernetic.co.in', 'Shubhanya Enterprises');
             $mail->addAddress($subscriber['email']);
             
             // Content
