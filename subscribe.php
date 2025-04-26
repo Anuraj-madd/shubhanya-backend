@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $response['success'] = true;
                 $response['message'] = "Thank you for subscribing to our newsletter!";
                 
-                /*
+                
                 // Database connection and insertion
                 // Make sure your config.php exists and has the correct credentials
                 require_once 'config.php';
@@ -98,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Close statement and connection
                 $stmt->close();
                 $conn->close();
-                */
+                
                 
             } catch (Exception $e) {
                 $response['message'] = "Database error";
