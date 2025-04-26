@@ -1,32 +1,40 @@
 <?php
 // subscribe.php - Handle newsletter subscription
-// Enable CORS
+// Enable CORS for all origins
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
     exit(0);
 }
 
-// Database connection settings
-require_once 'config.php';
+// Get raw input for debugging
+$raw_input = file_get_contents('php://input');
 
 // Initialize response array
 $response = array(
     'success' => false,
     'message' => '',
-    'debug' => '' // Add this for debugging
+    'debug' => array(
+        'method' => $_SERVER['REQUEST_METHOD'],
+        'content_type' => $_SERVER['CONTENT_TYPE'] ?? 'Not set',
+        'raw_input' => $raw_input,
+        'post_data' => $_POST,
+    )
 );
 
 // Only process POST requests
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Debug: Check if any POST data was received
-    if (empty($_POST)) {
-        $response['debug'] = 'No POST data received. Raw input: ' . file_get_contents('php://input');
+    // Check for raw input and parse if needed
+    if (empty($_POST) && !empty($raw_input)) {
+        parse_str($raw_input, $parsed_data);
+        if (!empty($parsed_data['email'])) {
+            $_POST['email'] = $parsed_data['email'];
+        }
     }
     
     // Check if email is provided
@@ -39,6 +47,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             
             try {
+                // For testing purposes, just return success without DB interaction
+                $response['success'] = true;
+                $response['message'] = "Thank you for subscribing to our newsletter!";
+                
+                /* 
+                // Uncomment this block when your database is properly set up
+                // Database connection settings
+                require_once 'config.php';
+                
                 // Create database connection
                 $conn = new mysqli($host, $username, $password, $database);
                 
@@ -75,10 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Close statement and connection
                 $stmt->close();
                 $conn->close();
+                */
                 
             } catch (Exception $e) {
                 $response['message'] = "Database error";
-                $response['debug'] = $e->getMessage(); // Only include in development
+                $response['debug']['error'] = $e->getMessage();
             }
             
         } else {
