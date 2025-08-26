@@ -1,34 +1,13 @@
 <?php
-// config.php
+$host = getenv("host");
+$db_name = getenv("db_name");
+$username = getenv("username"); // Default for XAMPP or Laragon
+$password = getenv("password");     // Default password is empty
 
-// Render usually sets DATABASE_URL or you may have "uri" in env
-$uri = getenv("DATABASE_URL") ?: getenv("uri");
+$conn = new mysqli($host, $username, $password, $db_name);
 
-if (!$uri) {
-    die("Database URI not found in environment.");
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-
-$fields = parse_url($uri);
-
-// Extract DB connection details
-$host = $fields["host"];
-$port = $fields["port"] ?? 3306;
-$user = $fields["user"];
-$pass = $fields["pass"];
-$dbname = ltrim($fields["path"], "/");
-
-// Build DSN with SSL (for Aiven/Render MySQL)
-$dsn = "mysql:host={$host};port={$port};dbname={$dbname};sslmode=verify-ca;sslrootcert=" . __DIR__ . "/ca.pem";
-
-try {
-    $db = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // throw exceptions on errors
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-
-    // Optional: test query
-    // $stmt = $db->query("SELECT VERSION()");
-    // echo "Connected. MySQL version: " . $stmt->fetchColumn();
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+?>
