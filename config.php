@@ -3,7 +3,7 @@ $host = "mysql-3aa1aa0e-shubhanya.g.aivencloud.com"; // Replace with your Aiven 
 $port = 15547; // Replace with your Aiven port
 $username = "avnadmin"; // Replace with your Aiven username
 $password = "AVNS_oXhussMQxPyj9ghiVUq"; // Replace with your Aiven password
-$database = "defaultdb"; // Replace with your database name
+$database = "shubhanya_db"; // Replace with your database name
 
 // Path to CA certificate
 $ca_cert = __DIR__ . "/ca.pem";
