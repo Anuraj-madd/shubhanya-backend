@@ -1,8 +1,8 @@
 <?php
-$host = "mysql-3aa1aa0e-yourproject.aivencloud.com"; // Replace with your Aiven host
-$port = 17462; // Replace with your Aiven port
+$host = "mysql-3aa1aa0e-shubhanya.g.aivencloud.com"; // Replace with your Aiven host
+$port = 15547; // Replace with your Aiven port
 $username = "avnadmin"; // Replace with your Aiven username
-$password = "AVNS_oXhussMQxP..."; // Replace with your Aiven password
+$password = "AVNS_oXhussMQxPyj9ghiVUq"; // Replace with your Aiven password
 $database = "defaultdb"; // Replace with your database name
 
 // Path to CA certificate
