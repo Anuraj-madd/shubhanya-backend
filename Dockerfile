@@ -1,11 +1,11 @@
 # Use the official PHP image with Apache
 FROM php:8.1-apache
 
-# Enable mod_rewrite (optional but useful)
+# Enable Apache rewrite (optional but useful for routing)
 RUN a2enmod rewrite
 
-# Install mysqli extension
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+# Install MySQL extensions (both mysqli and pdo_mysql)
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 # Copy your PHP files into the container
 COPY . /var/www/html/
