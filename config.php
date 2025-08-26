@@ -19,5 +19,5 @@ if (!mysqli_real_connect($conn, $host, $username, $password, $database, $port, N
     die("Connection failed: " . mysqli_connect_error());
 }
 
-echo "Connected successfully (via SSL)!";
+//echo "Connected successfully (via SSL)!";
 ?>
