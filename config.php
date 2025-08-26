@@ -1,8 +1,8 @@
 <?php
-$host = getenv("host")
-$port = getenv("port")
-$username = getenv("username")
-$password = getenv("password")
+$host = getenv("host");
+$port = getenv("port");
+$username = getenv("username");
+$password = getenv("password");
 $database = getenv("db_name"); // Replace with your database name
 
 // Path to CA certificate
