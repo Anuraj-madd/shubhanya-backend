@@ -14,6 +14,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+require_once 'cloudinary_config.php';
+
 $upload_dir = "uploads/";
 if (!file_exists($upload_dir)) {
     mkdir($upload_dir, 0777, true);
@@ -31,6 +33,12 @@ if ($method === 'GET') {
     $result = $conn->query("SELECT * FROM products");
     $products = [];
     while ($row = $result->fetch_assoc()) {
+        // Normalize legacy local filenames to absolute URLs
+        if (!empty($row['image']) && strpos($row['image'], 'http') !== 0) {
+            $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']);
+            $baseUrl = rtrim($baseUrl, '/');
+            $row['image'] = $baseUrl . '/uploads/' . ltrim($row['image'], '/');
+        }
         $products[] = $row;
     }
     echo json_encode($products);
@@ -45,8 +53,15 @@ if ($method === 'GET') {
     
     $image_name = $_POST['existingImage'];
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $image_name = time() . '_' . $_FILES['image']['name'];
-        move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $image_name);
+        try {
+            $uploadResult = (new \Cloudinary\Api\Upload\UploadApi())->upload(
+                $_FILES['image']['tmp_name'],
+                ['folder' => 'products']
+            );
+            $image_name = $uploadResult['secure_url'];
+        } catch (\Exception $e) {
+            error_log("Cloudinary upload failed (update): " . $e->getMessage());
+        }
     }
     
     $stmt = $conn->prepare("UPDATE products SET name=?, mrp=?, price=?, stock=?, offer=?, description=?, image=? WHERE id=?");
@@ -68,8 +83,15 @@ if ($method === 'GET') {
 
     $image_name = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $image_name = time() . '_' . $_FILES['image']['name'];
-        move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $image_name);
+        try {
+            $uploadResult = (new \Cloudinary\Api\Upload\UploadApi())->upload(
+                $_FILES['image']['tmp_name'],
+                ['folder' => 'products']
+            );
+            $image_name = $uploadResult['secure_url'];
+        } catch (\Exception $e) {
+            error_log("Cloudinary upload failed (create): " . $e->getMessage());
+        }
     }
 
     $stmt = $conn->prepare("INSERT INTO products (name, mrp, price, stock, offer, description, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
